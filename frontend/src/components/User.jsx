@@ -1,4 +1,3 @@
-// src/components/TwitterProfile.js
 import React from "react";
 import { Calendar } from "lucide-react";
 import ProfileAct from "./ProfileAct";
