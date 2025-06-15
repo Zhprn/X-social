@@ -9,12 +9,10 @@ import {
   UserRound,
   CircleEllipsis,
   Camera,
-  List,
-  Smile,
 } from "lucide-react";
 import imgLogo from "../assets/xlogo.webp";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
 import Swal from "sweetalert2";
@@ -104,6 +102,22 @@ export default function Sidebar() {
     }
   };
 
+  const [profile, setProfile] = useState({});
+  const userId = Cookies.get("id");
+
+  useEffect(() => {
+    if (userId) {
+      axios
+        .get("http://localhost:3000/api/v1/user", { withCredentials: true })
+        .then((res) => {
+          setProfile(res.data);
+        })
+        .catch((err) => {
+          console.error(err);
+        });
+    }
+  }, [userId]);
+
   return (
     <div className="sidebar d-flex flex-column p-1 align-items-start fixed-top border-end border-dark min-vh-100 bg-black">
       <img src={imgLogo} className="w-25 mb-3" alt="Logo" />
@@ -129,9 +143,16 @@ export default function Sidebar() {
       <button>
         <X className="me-2" /> Premium
       </button>
-      <button onClick={() => navigate("/profile")}>
+
+      {/* ✅ Profile button using username */}
+      <button
+        onClick={() =>
+          profile.username && navigate(`/profile/${profile.username}`)
+        }
+      >
         <UserRound className="me-2" /> Profile
       </button>
+
       <button>
         <CircleEllipsis className="me-2" /> More
       </button>
@@ -147,8 +168,8 @@ export default function Sidebar() {
             style={{ width: "60px", height: "60px", fontWeight: "bold" }}
           ></div>
           <div className="ms-2 text-start">
-            <h2 className="fs-5 text-white">Zhafran Amuri</h2>
-            <h2 className="fs-6 text-white opacity-50">@zhfrnamrr</h2>
+            <h2 className="fs-5 text-white">{profile.full_name}</h2>
+            <h2 className="fs-6 text-white opacity-50">@{profile.username}</h2>
           </div>
         </button>
 
@@ -167,7 +188,7 @@ export default function Sidebar() {
         )}
       </div>
 
-      {/* 🔵 MODAL POST */}
+      {/* 🔵 Modal Post */}
       <Modal show={show} onHide={handleClose}>
         <Modal.Header closeButton className="bg-black border-0" />
         <Modal.Body className="bg-black">

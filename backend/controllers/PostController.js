@@ -69,21 +69,56 @@ exports.addPost = [
 
 exports.getAllPost = async (req, res) => {
   try {
-    const posts = await Post.findAll({
+    const userId = parseInt(req.cookies.id);
+    if (!userId) return res.status(401).json({ message: "Unauthorized" });
+
+    const posts = await db.post.findAll({
       include: [
         {
-          model: User,
-          attributes: ["id", "username", "full_name"],
+          model: db.user,
+          attributes: ["id", "username", "full_name", "is_private"],
         },
       ],
       order: [["createdAt", "DESC"]],
     });
 
-    res.status(200).json(posts);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+    const follows = await db.follow.findAll({
+      where: { follower_id: userId },
+    });
+
+    const result = posts.map((post) => {
+      const postUser = post.user;
+      let status = null;
+
+      // Jangan tampilkan kalau user privat dan belum difollow
+      const followEntry = follows.find((f) => f.following_id === postUser.id);
+      if (followEntry) {
+        status = followEntry.status; // 'requested' / 'following'
+      }
+
+      return {
+        id: post.id,
+        caption: post.caption,
+        attachment: post.attachment,
+        createdAt: post.createdAt,
+        user: {
+          id: postUser.id,
+          username: postUser.username,
+          full_name: postUser.full_name,
+          is_private: postUser.is_private,
+        },
+        status, // <- INI dia status follow (null/requested/following)
+      };
+    });
+
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ message: "Server error", error: err.message });
   }
 };
+
+
+
 
 exports.deletePost = async (req, res) => {
   try {

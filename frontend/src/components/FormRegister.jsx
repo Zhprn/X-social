@@ -5,7 +5,7 @@ import Swal from "sweetalert2";
 import { useNavigate } from "react-router-dom";
 
 export default function FormRegister() {
-  const [isPublic, setIsPublic] = useState(false);
+  const [isPrivate, setisPrivate] = useState(false);
   const [username, setUsername] = useState("");
   const [full_name, setFullname] = useState("");
   const [password, setPassword] = useState("");
@@ -16,13 +16,14 @@ export default function FormRegister() {
     e.preventDefault();
 
     try {
-      await axios.post("http://localhost:3000/api/v1/auth/register", {
-        username,
-        full_name,
-        password,
-        bio,
-        is_public: isPublic,
-      });
+await axios.post("http://localhost:3000/api/v1/auth/register", {
+  username,
+  full_name,
+  password,
+  bio,
+  is_private: isPrivate,
+});
+
 
       Swal.fire({
         icon: "success",
@@ -99,14 +100,14 @@ export default function FormRegister() {
               type="checkbox"
               role="switch"
               id="switchCheckDefault"
-              checked={isPublic}
-              onChange={(e) => setIsPublic(e.target.checked)}
+              checked={isPrivate}
+              onChange={(e) => setisPrivate(e.target.checked)}
             />
             <label
               className="form-check-label text-white"
-              htmlFor="switchCheckDefault" // gunakan htmlFor di React
+              htmlFor="switchCheckDefault"
             >
-              Public
+              Private
             </label>
           </div>
 

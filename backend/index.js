@@ -6,6 +6,7 @@ const path = require("path");
 
 const userRoutes = require ('./routes/UserRoutes.js')
 const postRoutes = require ('./routes/PostRoutes.js')
+const followRoutes = require ('./routes/FollowRoutes.js')
 
 const app = express()
 app.use(cors({
@@ -16,8 +17,9 @@ app.use(express.json({ extended : true }))
 app.use(cookieParser());
 
 app.use("/public", express.static(path.join(__dirname, "public")));
-app.use('/api/v1/auth', userRoutes);
+app.use('/api/v1', userRoutes);
 app.use('/api/v1/posts', postRoutes);
+app.use('/api/v1/users', followRoutes);
 
 // const db = require('./models')
 // db.sequelize.sync({alter : true}).then(() =>{

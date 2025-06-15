@@ -8,6 +8,8 @@ import Explore from "./pages/Explore";
 import Profile from "./pages/Profile";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import UserProfile from "./components/UserProfile";
+import Users from "./pages/Users";
 
 function App() {
   return (
@@ -35,16 +37,8 @@ function App() {
             </ProtectedRoute>
           }
         />
-        <Route
-          path="/profile"
-          element={
-            <ProtectedRoute>
-              <MainLayout>
-                <Profile />
-              </MainLayout>
-            </ProtectedRoute>
-          }
-        />
+<Route path="/profile/:username" element={<Profile />} />
+ <Route path="/:username" element={<Users />} />
       </Routes>
     </Router>
   );

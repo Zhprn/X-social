@@ -8,33 +8,40 @@ exports.register = async (req, res) => {
     const { full_name, username, password, bio, is_private } = req.body;
 
     function isAlphaNumeric(str) {
-      return /^[a-zA-Z0-9]+$/.test(str);
+      return /^[a-zA-Z0-9._]+$/.test(str);
     }
 
     if (username.length < 3) {
-      return res.status(500).json({ message: "required, min 3 chars, unique, onlpy alphanumeric, dot '.' or underscore '_' allowed" });
+      return res.status(500).json({
+        message: "required, min 3 chars, unique, only alphanumeric, dot '.' or underscore '_' allowed"
+      });
     } else if (!isAlphaNumeric(username)) {
-        return res.status(500).json({message : "required, min 3 chars, unique, onlpy alphanumeric, dot '.' or underscore '_' allowed"})
+      return res.status(500).json({
+        message: "required, min 3 chars, unique, only alphanumeric, dot '.' or underscore '_' allowed"
+      });
     } else if (password.length < 6) {
       return res.status(500).json({ message: "required, min 6 chars" });
     } else if (bio.length > 100) {
-        return res.status(500).json({ message : "required, max 100 chars"})
+      return res.status(500).json({ message: "required, max 100 chars" });
     }
 
     const salt = await bcrypt.genSalt();
     const hashpassword = await bcrypt.hash(password, salt);
+
     const user = await User.create({
-      full_name: full_name,
-      username: username,
+      full_name,
+      username,
       password: hashpassword,
-      bio: bio,
-      is_private: is_private,
+      bio,
+      is_private: is_private ?? false, // default ke false jika undefined
     });
+
     res.status(200).json(user);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
+
 
 exports.login = async (req, res) => {
   try {
@@ -101,12 +108,63 @@ exports.logout = async (req, res) => {
 
 exports.getAllUsers = async (req, res) => {
   try {
-    const users = await User.findAll({
-      attributes: ["id", "username", "full_name"], // Ambil kolom yang dibutuhkan saja
-    });
+    const users = await User.findAll();
     res.status(200).json(users);
   } catch (error) {
-    console.error("Error fetching users:", error);
     res.status(500).json({ message: "Gagal mengambil daftar user" });
   }
 };
+
+exports.getUser = async (req, res) => {
+  const userId = req.cookies.id;
+
+  if (!userId) {
+    return res.status(401).json({ message: "Unauthorized. No user_id in cookie." });
+  }
+
+  try {
+    const user = await User.findByPk(userId, {
+      attributes: ["id", "full_name", "username", "createdAt"],
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    return res.json(user);
+  } catch (err) {
+    return res.status(500).json({ message: "Server error", error: err.message });
+  }
+};
+
+exports.getOneUser = async (req, res) => {
+  const { username } = req.params;
+
+  if (!username) {
+    return res.status(400).json({ message: "Bad request. No username provided." });
+  }
+
+  try {
+    const user = await User.findOne({
+      where: { username },
+      attributes: ["id", "full_name", "username", "createdAt"],
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    return res.json(user);
+  } catch (err) {
+    return res.status(500).json({ message: "Server error", error: err.message });
+  }
+};
+
+exports.getDetailUser = async (req, res) => {
+  try {
+    const userId = req.cookies.id;
+    
+  } catch (error) {
+    
+  }
+}
